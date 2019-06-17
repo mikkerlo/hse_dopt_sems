@@ -1,0 +1,132 @@
+\section*{Семинар 3}
+не ну это бан
+\section*{Семинар 4}
+Итак мы хотим разобрать страшный алгоритм под названием Primal-Dual
+
+Для примера разберем задачу о покрытии множества
+
+Итак пусть есть множество: 
+\[
+	\begin{cases}
+		E = \{1, 2, \ldots, n\}\\
+		\mathcal{F} \subseteq 2^E\\
+		G \subseteq \mathcal{F}\\
+		\bigcup_{s \in G} s = E\\
+		\sum_{s \in G} c(s) \to \min
+	\end{cases}
+\]
+
+Запишем целочисленную задачу
+\[
+	\begin{cases}
+		x: \mathcal{F} \to \Z_+\\
+		\forall e \in E \sum_{e \ni s} x(s) \leq 1\\
+		\sum_{e \ni s} c(s) x(s) \to \min
+	\end{cases}
+\]
+
+Релаксируем
+\[
+	\begin{cases}
+		x: \mathcal{F} \to \R_+\\
+		\sum_{s \ni e} x(s) \leq 1 \forall e \in E\\
+		\sum_{s \ni e} x(s) c(s) \to \min
+	\end{cases}
+\]
+
+ Назовем толщиной покрытия $\mathcal{F}: f = \max_{e \in E} \#\{S | S \ni e\}$
+ $x^\star \to \tilde{x}$
+ $\tilde{x} = I\{x^\star (s) \leq \alpha\}$
+ $\alpha = \frac1f$
+
+ $c^T \tilde x \leq f c^T x \star$ -- ибо каждое слагаемое выросло не более чем в $f$ раз
+
+ Ну значит от настоящего решения не более чем в $f$ раз.
+
+ Но это плохо вообще ибо это только сиплексами всякими решать а они численно не устойчивые
+ \[
+ 	\begin{cases}
+ 		y: E \to \R_+\\
+ 		\sum_{e \in S} y(e) \leq c(s)  \forall S \in \mathcal{F}\\
+ 		\sum_{e \in E} y_e \to max
+ 	\end{cases}
+ \]
+
+Цель: получить $x^\star$ и $y^\star$.
+
+Главный инвариант: в любой момент работы алгоритма будет пара $(x, y)$ -- будут удоволетворять условиям дополняющей нежесткости
+
+Главный помошник младшего помошника главного инварианта: $y$ -- допустимое решение нашего инварианта
+
+Как только $x$ стал допустимым то мы нашли решения по теореме дополняющей нежесткости.
+
+Th: Пусть $x, y$ допустимы в прямой и двойственной соответственны, 
+то они оптимальны $\Leftrightarrow$ когда выполнены условия дополняющей нежесткости.
+
+Th: ($\alpha \beta$ ) пусть $x, y$ -- допустимы, тогда если выполнены
+$(CS^\alpha_x)$, ($CS^\beta_y$) то $x, y$ -- отличаются от оптимальных не более чем в $\alpha \cdot \beta$ раз.
+
+Итак осталось понять что есть $(CS^\alpha_x)$ и $(CS^\beta_y)$й
+
+Пусть есть две \sout{стула} задачи
+\[
+	\begin{cases}
+		x \geq 0\\
+		A x \leq b\\
+		c^Tx \to \max\\
+	\end{cases}
+\]
+
+\[
+	\begin{cases}
+		y \leq 0\\
+		A^Ty \leq c\\
+		b^T y \to \min
+	\end{cases}
+\]
+
+Запишем условия доп нежесткости:
+$(x_j = 0) \vee \left(\left(A^T y\right)_j = c_j\right)$
+$(y_i = 0) \vee \left(\left(A^T x\right)_i = b_i\right)$
+И расслабленные
+$(x_j = 0) \vee \left(\left(A^T y\right)_j \leq \alpha c_j\right)$
+$(y_i = 0) \vee \left(\left(A^T x\right)_i \geq \frac1\beta b_i\right)$
+
+Книги:
+Vazirani
+Korte-Vygen
+Schrijver
+
+Итак веренемся к нашим primal-dual
+
+Запишем условия доп нежесткости
+$(CS_x):$ $(x(s) = 0) \vee (\sum_{e \in S} y(e) = c(S)) \forall S \in \mathcal{F}$
+
+$(CS_y):$ $(y(e) = 0) \vee (\sum_{S \ni e} x(s) = 1)$
+
+$(CS_y^f):$ $(y(e) = 0) \vee (\sum_{S \ni e} x(s) \leq f)$ -- это всегда выполнено
+
+И пусть $x, y$ -- допустимы тогда они $f$ приближение.
+
+Итак мы наконец вернемся к нашем алгоритму
+Меняем наш главный инвариант на расслабленное условие.
+
+Шаг 1:
+Инициализируем $x = 0, y = 0$.
+
+Шаг 2:
+Шевеление:
+$c'(S) = c(S) - \sum_{e \in S} y(e)$ -- приведенная стоимость.
+
+Условие допустимости: $c'(S) \geq 0$
+Условие доп нежесткости: $(x(s) = 0) \vee (c'(S) = 0) \forall S \in \mathcal{F}$
+Жесткое множество: $c'(S) = 0$
+
+Итак пусть $c'(S) = 0, x(S) = 0 \Rightarrow x(S) := 1$
+
+Шаг 3:
+Оглядется если $x$ допустимый то мы победили
+
+Шаг 4:
+$\exists e \in E$ -- не покрытый
+$y_e += \min_{s \ni e} C'(S)$
